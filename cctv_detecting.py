@@ -17,44 +17,32 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
 def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야함
-    source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
+    # 각 필요한 파라미터 입력
+    source, weights, view_img, save_txt, imgsz,homo_ch = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size,opt.homo_ch
+
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
+    #스트리밍 주소 추출
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
-    # rect_list = np.array([[295, 85],[52, 456],[648, 456],[418, 87]], np.int32) # hunnn 검출 범위 박스(더 멀리있는거까지)
-    # rect_list = np.array([[80, 411], [283, 113], [435, 115], [620, 410]], np.int32)  # 차량 검출 범위 박스 80
-    # rect_list = np.array([[86, 430], [279, 119], [435, 120], [622, 417]], np.int32)  # 차량 검출 범위 박스 79
-    # rect_list = np.array([[267, 132], [96, 406], [648, 416], [439, 128]], np.int32)  # 차량 검출 범위 박스 B2 A75
-    # rect_list = np.array([[270, 116],[441, 117], [646, 411], [57, 411]]) # hunnn 80
-    rect_list = np.array(homo_point.pts_dst[75])
+    rect_list = np.array(homo_point.pts_dst[homo_ch]) #homo_point.pts_dst[num] 기본 입력
+
     # Create a black image
-    img_b = np.zeros((480, 720, 3), dtype=np.uint8)
-    img_b = cv2.fillPoly(img_b, [rect_list], (255, 255, 255))
-    img_b = cv2.cvtColor(img_b, cv2.COLOR_BGR2GRAY)
-    res, thr = cv2.threshold(img_b, 127, 255, cv2.THRESH_BINARY)
-    contours_b, his = cv2.findContours(thr, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    img_b = np.zeros((480, 720, 3), dtype=np.uint8) #720 * 480 사이즈 이미지 추출
+    img_b = cv2.fillPoly(img_b, [rect_list], (255, 255, 255)) # 흰색으로 된 다각형 그리기
+    img_b = cv2.cvtColor(img_b, cv2.COLOR_BGR2GRAY) # GRAYSCALE로 이미지 변환
+    res, thr = cv2.threshold(img_b, 127, 255, cv2.THRESH_BINARY) # BINARY화 특정 임계값에 도달하지 못할시 0으로 바꿈
+    contours_b, his = cv2.findContours(thr, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # 윤곽선 추출
 
     # Homograpy 처리 후 매핑작업
-    im_src = cv2.imread('ch_b1.png')  # 1층
-    # im_src = cv2.imread('ch_b2.png')  # 2층
-    # pts_src = np.array([[991, 284], [957, 283], [956, 239], [993, 239]])
-    # pts_src = np.array([[6872, 1656], [7374, 1664], [7355, 1488], [6880, 1446]])  # 79
-    # pts_src = np.array([[7736, 1688], [7396, 1686], [7402, 1439], [7720, 1442]])  # 80
-    # pts_src = np.array([[21072, 934], [20743, 909], [20735, 1142], [21073, 1130]])  # B2 A75
-    # pts_src = np.array([[6823, 1699],[6823, 1421],[7382, 1421],[7382, 1695]]) #hunnn 79
-    # pts_src = np.array([[7382, 1695], [7382, 1421], [7948, 1421], [7944, 1695]]) # hunnn 80
-    pts_src = np.array(homo_point.pts_src[75])
-    cv2.polylines(im_src, [pts_src], True, (0, 0, 0), 2)
+    im_src = cv2.imread('ch_b1.png')  # 1층 주차장 도면
+    pts_src = np.array(homo_point.pts_src[homo_ch]) # 주차장 매칭점
+    cv2.polylines(im_src, [pts_src], True, (0, 0, 0), 2) # 주차장 매칭점 Bound 표시
     im_dst = cv2.imread('cam80.png')
-    # pts_dst = np.array([[268, 130], [84, 428], [640, 407], [433, 121]])  # 79
-    # pts_dst = np.array([[202, 182], [259, 117], [448, 118], [506, 183]])  # 80
-    # pts_dst = np.array([[245, 130], [96, 296], [610, 289], [461, 128]])  # B2 A75
-    # pts_dst = np.array([[264, 130],[441, 126], [667, 414],[63, 430]]) # hunnn 79
-    # pts_dst = np.array([[270, 116],[441, 117], [646, 411], [57, 411]]) # hunnn 80
-    pts_dst = np.array(homo_point.pts_dst[75])
-    cv2.polylines(im_dst, [pts_dst], True, (255, 255, 255), 2)
-    h1, status = cv2.findHomography(pts_dst, pts_src)
+
+    pts_dst = np.array(homo_point.pts_dst[homo_ch]) # 영상 속 주차장 매칭점
+    cv2.polylines(im_dst, [pts_dst], True, (255, 255, 255), 2) # 영상 속 매칭점 Bound 표시
+    h1, status = cv2.findHomography(pts_dst, pts_src) # Homography 값 계산
     
     # Directories
     save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
@@ -69,7 +57,8 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
     model = attempt_load(weights, map_location=device)  # load FP32 model
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
-    names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+
+    # 가중치 절반 사용
     if half:
         model.half()  # to FP16
 
@@ -81,10 +70,12 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
 
     # Set Dataloader
     vid_path, vid_writer = None, None
+
     if webcam:
         view_img = check_imshow()
         cudnn.benchmark = True  # set True to speed up constant image size inference
         dataset = LoadStreams(source, img_size=imgsz, stride=stride)
+
     else:
         dataset = LoadImages(source, img_size=imgsz, stride=stride)
 
@@ -117,7 +108,6 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
             pred = apply_classifier(pred, modelc, img, im0s)
 
         data_list = []
-        person_list = []
         im0 = im0s.copy()
 
         # Process detections
@@ -158,37 +148,19 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
 
                     if save_img or opt.save_crop or view_img:  # Add bbox to image
                         x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, int(xyxy[3])  # 중심점 좌표 x, y
-                        # rect_list = np.array([[80, 411], [283, 113], [435, 115], [620, 410]], np.int32)  # 차량 검출 범위 박스
-                        # # Create a black image
-                        # img_b = np.zeros((480, 720, 3), dtype=np.uint8)
-                        # img_b = cv2.polylines(img_b, [rect_list], True, (255, 255, 255), 4)
-                        # cv2.imshow('testsss', img_b)
-                        # cv2.waitKey(0)
+                        dist = cv2.pointPolygonTest(contours_b[0], (x1, y1), False) # 임의점과 다각형의 거리 계산
 
-                        # img_b = cv2.cvtColor(img_b, cv2.COLOR_BGR2GRAY)
-                        # res, thr = cv2.threshold(img_b, 127, 255, cv2.THRESH_BINARY)
-                        # contours_b, his = cv2.findContours(thr, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-                        # cv2.drawContours(img_b, contours_b[0], -1, (0, 255, 0), 4)
-                        # cv2.imshow('testsss', img_b)
-                        # cv2.waitKey(0)
-                        
-                        dist = cv2.pointPolygonTest(contours_b[0], (x1, y1), False)
-
-                        # if names[int(cls)] == 'car' or names[int(cls)] == 'person':  # box 가 차량이나 사람일 경우
-                        if names[int(cls)] == 'car'and dist == 1:
+                        if names[int(cls)] == 'car' and dist == 1: # 임의로 정해놓은 Bound안에 들어온 차량만 표시
                             label = f'{names[int(cls)]}'
                             xyxy_ = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]) - int(xyxy[0]),
                                      int(xyxy[3]) - int(xyxy[1])]
-                            data_list.append(xyxy_)
-                            # x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, (int(xyxy[1]) + int(xyxy[3])) / 2  # 중심점 좌표 x, y
-                            #  크기? 중심점 위치? 를 사용하여 디텍팅 되는 차량을 한정지음
 
-                            plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
+                            data_list.append(xyxy_) # 조건을 만족하는 차량만 data_list에 추가
+                            plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2) # Bounding Box 표시
+
                             # 차량 탐지 정확도 출력
-                            cv2.putText(im0, str(conf), (xyxy_[0], xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 1, cv2.LINE_AA)
-            # data_list.append(dat)  # dat: 검출된 box xy 좌표 배열 목록
+                            cv2.putText(im0, str(conf), (xyxy_[0], xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 1, cv2.LINE_AA) #Conf 표시
 
-            # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
 
             # Stream results
@@ -197,14 +169,14 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
                 cv2.waitKey(1)  # 1 millisecond
         t3 = time_synchronized()
 
-        # cv2.imshow('maps', im_src)
-
         far_persons_list = np.empty((0, 4), int)
         near_persons_list = np.empty((0, 4), int)
 
+        # 이미지 복사
         if len(data_list) != 0:
             dst2 = im_src.copy()
 
+        # 검출된 객체들의 좌표 Homography 변환
         for i in range(len(data_list)):  # boxes: yolo 검출된 box 의 x, y, w, h
             x, y, w, h = data_list[i][0], data_list[i][1], data_list[i][2], data_list[i][3]
             color = (0, 0, 255)
@@ -220,7 +192,8 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
             np.transpose(p_point)
             Cal = h1 @ p_point
             realC = Cal / Cal[2]
-            print(realC)
+            print(realC) # Homography 변환후 계산된 좌표값
+
             a = round(int(realC[0]), 0)  # 중심점 x 좌표
             b = round(int(realC[1]), 0)  # 중심점 y 좌표
 
@@ -232,11 +205,6 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
         if len(data_list) != 0:
             dst2 = cv2.resize(dst2, dsize=(0, 0), fx=0.1, fy=0.1, interpolation=cv2.INTER_AREA)
             cv2.imshow("Source Image", dst2)
-        #  바둑판 그리기
-        # for k in range(0, 14):
-        #     cv2.line(im0, (k * 50, 0), (k * 50, 480), (120, 120, 120), 1, 1)
-        # for k in range(0, 9):
-        #     cv2.line(im0, (0, k * 50), (720, k * 50), (120, 120, 120), 1, 1)
         t4 = time_synchronized()
 
         print(f'{s}Done2. ({t4 - t3:.3f}s)')
@@ -246,17 +214,11 @@ def detect(opt):  # Homography 매칭에 사용되는 행렬값 입력받아야�
         if cv2.waitKey(27) == ord('w'):
             exit()
 
-    # if save_txt or save_img:
-    #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-    #     print(f"Results saved to {save_dir}{s}")
-    #
-    # print(f'Done. ({time.time() - t0:.3f}s)')
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str, default='data/videos/75.mp4', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--homo-ch', type=int, default=75, help='보고자하는 CCTV 구역 숫자 입력 ex) 75,77,80...')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.4, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
