@@ -182,7 +182,7 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
                             x, y, w, h = xyxy_[0], xyxy_[1], xyxy_[2], xyxy_[3]
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                             cv2.putText(im0, f'X:{x + (w // 2)} Y:{y + h}', (xyxy_[0]+(w//2), xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
-                            cv2.circle(im0,(xyxy_[0]+(w//2), xyxy_[1]),30,(0,0,255),-1)
+                            cv2.circle(im0,(xyxy_[0]+(w//2), xyxy_[1]),5,(0,0,255),-1)
 
                             fx = x + (w / 2)
                             fy = y + h  # 차 밑 부분 찍는게 맞음 450
