@@ -170,7 +170,6 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
                     if save_img or opt.save_crop or view_img:  # Add bbox to image
                         x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, int(xyxy[3])  # 중심점 좌표 x, y
-                        # pointPolygonTest:(x1,y1) 좌표가 통로 내부에 있다고(등치선) 판단되면은 1, 일치하면 0, 밖에 있으면 -1
                         dist = cv2.pointPolygonTest(contours_b[0], (x1, y1), False)
 
                         #  객체가 차량(사람)이고 통로 내부에 위치하고 있다면 Homography 연산 실행
@@ -182,7 +181,7 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
                             x, y, w, h = xyxy_[0], xyxy_[1], xyxy_[2], xyxy_[3]
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
-                            cv2.putText(im0, f'X:{xyxy_[0]} Y:{xyxy_[1]}', (xyxy_[0]+(w/2), xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
+                            cv2.putText(im0, f'X:{x + (w / 2)} Y:{y + h}', (xyxy_[0]+(w/2), xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
 
                             fx = x + (w / 2)
                             fy = y + h  # 차 밑 부분 찍는게 맞음 450
