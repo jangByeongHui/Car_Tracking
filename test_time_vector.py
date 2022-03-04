@@ -185,9 +185,6 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
                             label = f'{names[int(cls)]}'
                             xyxy_ = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]) - int(xyxy[0]),
                                     int(xyxy[3]) - int(xyxy[1])]
-                            # x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, (int(xyxy[1]) + int(xyxy[3])) / 2  # 중심점 좌표 x, y
-                            #  크기? 중심점 위치? 를 사용하여 디텍팅 되는 차량을 한정지음
-
                             x, y, w, h = xyxy_[0], xyxy_[1], xyxy_[2], xyxy_[3]
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                             cv2.putText(im0, f'X:{x + (w / 2)} Y:{y + h}', (xyxy_[0]+(w/2), xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
