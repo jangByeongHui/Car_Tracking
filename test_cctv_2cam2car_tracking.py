@@ -599,8 +599,8 @@ def func2(q2):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')
-    # parser.add_argument('--source', type=str, default='rtsp://admin:admin1234@218.153.209.100:502/cam/realmonitor?channel=10&subtype=1', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--source', type=str, default='./data/videos/80.mp4', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--homo-ch', type=int, default=80, help='보고자하는 CCTV 구역 숫자 입력 ex) 75,77,80...')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.4, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')

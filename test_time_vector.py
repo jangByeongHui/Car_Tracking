@@ -26,12 +26,8 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
-    # rect_list = np.array([[295, 85],[52, 456],[648, 456],[418, 87]], np.int32)
-    
-    # rect_list = np.array([[80, 411], [283, 113], [435, 115], [620, 410]], np.int32)  # 차량 검출 범위 박스 80
-    # rect_list = np.array([[86, 430], [279, 119], [435, 120], [622, 417]], np.int32)  # 차량 검출 범위 박스 79
-    # rect_list = np.array([[267, 132], [96, 406], [648, 416], [439, 128]], np.int32)  # 차량 검출 범위 박스 B2 A75
-    rect_list = np.array(homo_point.pts_dst[cam_num])
+    # 호모그래피 destination 이미지 좌표 값
+    rect_list = np.array(homo_point.pts_dst[cam_num],np.int32)
 
     # Create a black image
     img_b = np.zeros((480, 720, 3), dtype=np.uint8)
@@ -42,23 +38,18 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
     # Homograpy 처리 후 매핑작업
     im_src = cv2.imread('ch_b1.png')  # 1층
-    # im_src = cv2.imread('ch_b2.png')  # 2층
-    # pts_src = np.array([[991, 284], [957, 283], [956, 239], [993, 239]])
-    # pts_src = np.array([[6872, 1656], [7374, 1664], [7355, 1488], [6880, 1446]])  # 79
-    # pts_src = np.array([[7736, 1688], [7396, 1686], [7402, 1439], [7720, 1442]])  # 80
-    # pts_src = np.array([[21072, 934], [20743, 909], [20735, 1142], [21073, 1130]])  # B2 A75
-    # pts_src = np.array([[7443,1699],[7163,1427],[7945,1425],[7943,1699]]) # nakkk
-    # pts_src = np.array([[6823, 1699],[6823, 1421],[7382, 1421],[7382, 1695]]) #hunnn 79
+    #호모그래피 Source 이미지 좌표 값
     pts_src = np.array(homo_point.pts_src[cam_num])
+    # 표시한 좌표로 연결된 Boundary 표시
     cv2.polylines(im_src, [pts_src], True, (0, 0, 0), 2)
+
+    # 실제 주차장 이미지
     im_dst = cv2.imread('cam80.png')
-    # pts_dst = np.array([[268, 130], [84, 428], [640, 407], [433, 121]])  # 79
-    # pts_dst = np.array([[202, 182], [259, 117], [448, 118], [506, 183]])  # 80
-    # pts_dst = np.array([[245, 130], [96, 296], [610, 289], [461, 128]])  # B2 A75
-    # pts_dst = np.array([[263,122],[424,91],[650,405],[54,406]]) # nakkk
-    # pts_dst = np.array([[264, 130],[441, 126], [667, 414],[63, 430]]) # hunnn 79
+   #호모그래피 Destination 이미지 좌표 값
     pts_dst = np.array(homo_point.pts_dst[cam_num])
+    # 표시한 좌표로 연결된 Boundary 표시
     cv2.polylines(im_dst, [pts_dst], True, (255, 255, 255), 2)
+    # Source 좌표와 Destination 좌표를 통한 Homography 변환 행렬 계산
     h1, status = cv2.findHomography(pts_dst, pts_src)
 
     # Directories
@@ -75,6 +66,7 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
     names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+
     if half:
         model.half()  # to FP16
 
@@ -113,9 +105,9 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
     for path, img, im0s, vid_cap in dataset:  # 이미지 처리 시작, 영상의 경우 한장씩
         # print(dataset[0])
         # frame synchronize
-        frame_sync += 1
-        if frame_sync % sync != 0:
-            continue
+        # frame_sync += 1
+        # if frame_sync % sync != 0:
+        #     continue
         t0 = time_synchronized()
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -178,22 +170,11 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
                     if save_img or opt.save_crop or view_img:  # Add bbox to image
                         x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, int(xyxy[3])  # 중심점 좌표 x, y
-                        # rect_list = np.array([[80, 411], [283, 113], [435, 115], [620, 410]], np.int32)  # 차량 검출 범위 박스
-                        # # Create a black image
-                        # img_b = np.zeros((480, 720, 3), dtype=np.uint8)
-                        # img_b = cv2.polylines(img_b, [rect_list], True, (255, 255, 255), 4)
-                        # cv2.imshow('testsss', img_b)
-                        # cv2.waitKey(0)
-
-                        # img_b = cv2.cvtColor(img_b, cv2.COLOR_BGR2GRAY)
-                        # res, thr = cv2.threshold(img_b, 127, 255, cv2.THRESH_BINARY)
-                        # contours_b, his = cv2.findContours(thr, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-                        # cv2.drawContours(img_b, contours_b[0], -1, (0, 255, 0), 4)
-                        # cv2.imshow('testsss', img_b)
-                        # cv2.waitKey(0)
-                        
+                        # pointPolygonTest:(x1,y1) 좌표가 통로 내부에 있다고(등치선) 판단되면은 1, 일치하면 0, 밖에 있으면 -1
                         dist = cv2.pointPolygonTest(contours_b[0], (x1, y1), False)
-                        # if names[int(cls)] == 'car' or names[int(cls)] == 'person':  # box 가 차량이나 사람일 경우
+
+                        #  객체가 차량(사람)이고 통로 내부에 위치하고 있다면 Homography 연산 실행
+                        # if names[int(cls)] == 'car' or names[int(cls)] == 'person' and dist==1:  # box 가 차량이나 사람일 경우
                         if names[int(cls)] == 'car'and dist == 1:
                             label = f'{names[int(cls)]}'
                             xyxy_ = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]) - int(xyxy[0]),
@@ -207,6 +188,8 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
                             fx = x + (w / 2)
                             fy = y + h  # 차 밑 부분 찍는게 맞음 450
+
+                            # Homography를 통한 좌표 변환
                             p_point = np.array([fx, fy, 1], dtype=int)
                             p_point.T
                             np.transpose(p_point)

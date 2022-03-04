@@ -21,16 +21,12 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 # global variable 
 
 def detect(opt, queue, sync, cam_num, record):  # Homography 매칭에 사용되는 행렬값 입력받아야함
-    source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
+    source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size,opt
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
-    # rect_list = np.array([[295, 85],[52, 456],[648, 456],[418, 87]], np.int32)
-    
-    # rect_list = np.array([[80, 411], [283, 113], [435, 115], [620, 410]], np.int32)  # 차량 검출 범위 박스 80
-    # rect_list = np.array([[86, 430], [279, 119], [435, 120], [622, 417]], np.int32)  # 차량 검출 범위 박스 79
-    # rect_list = np.array([[267, 132], [96, 406], [648, 416], [439, 128]], np.int32)  # 차량 검출 범위 박스 B2 A75
+    # Homography 변환을 위한 매칭점 load
     rect_list = np.array(homo_point.pts_dst[cam_num])
 
     # Create a black image
@@ -42,21 +38,11 @@ def detect(opt, queue, sync, cam_num, record):  # Homography 매칭에 사용되
 
     # Homograpy 처리 후 매핑작업
     im_src = cv2.imread('ch_b1.png')  # 1층
-    # im_src = cv2.imread('ch_b2.png')  # 2층
-    # pts_src = np.array([[991, 284], [957, 283], [956, 239], [993, 239]])
-    # pts_src = np.array([[6872, 1656], [7374, 1664], [7355, 1488], [6880, 1446]])  # 79
-    # pts_src = np.array([[7736, 1688], [7396, 1686], [7402, 1439], [7720, 1442]])  # 80
-    # pts_src = np.array([[21072, 934], [20743, 909], [20735, 1142], [21073, 1130]])  # B2 A75
-    # pts_src = np.array([[7443,1699],[7163,1427],[7945,1425],[7943,1699]]) # nakkk
-    # pts_src = np.array([[6823, 1699],[6823, 1421],[7382, 1421],[7382, 1695]]) #hunnn 79
+
     pts_src = np.array(homo_point.pts_src[cam_num])
     cv2.polylines(im_src, [pts_src], True, (0, 0, 0), 2)
     im_dst = cv2.imread('cam80.png')
-    # pts_dst = np.array([[268, 130], [84, 428], [640, 407], [433, 121]])  # 79
-    # pts_dst = np.array([[202, 182], [259, 117], [448, 118], [506, 183]])  # 80
-    # pts_dst = np.array([[245, 130], [96, 296], [610, 289], [461, 128]])  # B2 A75
-    # pts_dst = np.array([[263,122],[424,91],[650,405],[54,406]]) # nakkk
-    # pts_dst = np.array([[264, 130],[441, 126], [667, 414],[63, 430]]) # hunnn 79
+
     pts_dst = np.array(homo_point.pts_dst[cam_num])
     cv2.polylines(im_dst, [pts_dst], True, (255, 255, 255), 2)
     h1, status = cv2.findHomography(pts_dst, pts_src)
@@ -304,6 +290,7 @@ def execute_tracking(q_num, cam_num, frame_sync, record):
     file = channel + start + '_' + finish
     # parser.add_argument('--source', type=str, default=f'rtsp://admin:admin1234@218.153.209.100:502/cam/realmonitor?channel={cam}&subtype=1', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--source', type=str, default=f'./data/videos/{file}.mp4', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--homo-ch', type=int, default=79, help='보고자하는 CCTV 구역 숫자 입력 ex) 75,77,80...')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.4, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
