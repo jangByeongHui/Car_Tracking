@@ -195,7 +195,7 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
                             realC = Cal / Cal[2]
                             a = round(int(realC[0]), 0)  # 중심점 x 좌표
                             b = round(int(realC[1]), 0)  # 밑바닥 y 좌표
-
+                            # 차량 지도 위치 저장
                             # 이전 frame record 없을 때
                             if len(time_vector[0]) == 0:
                                 time_vector[0].append([frame_sync, a, b])
