@@ -179,26 +179,24 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
                             label = f'{names[int(cls)]}'
                             xyxy_ = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]) - int(xyxy[0]),
                                     int(xyxy[3]) - int(xyxy[1])]
-                            # x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, (int(xyxy[1]) + int(xyxy[3])) / 2  # 중심점 좌표 x, y
-                            #  크기? 중심점 위치? 를 사용하여 디텍팅 되는 차량을 한정지음
 
                             x, y, w, h = xyxy_[0], xyxy_[1], xyxy_[2], xyxy_[3]
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                             cv2.putText(im0, str(conf), (xyxy_[0], xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 1, cv2.LINE_AA)
 
-                            fx = x + (w / 2)
+                            # fx = x + (w / 2)
+                            fx = x +(w-x)/2
                             fy = y + h  # 차 밑 부분 찍는게 맞음 450
 
                             # Homography를 통한 좌표 변환
                             p_point = np.array([fx, fy, 1], dtype=int)
-                            p_point.T
+                            # p_point.T
                             np.transpose(p_point)
                             Cal = h1 @ p_point
                             realC = Cal / Cal[2]
                             a = round(int(realC[0]), 0)  # 중심점 x 좌표
                             b = round(int(realC[1]), 0)  # 밑바닥 y 좌표
-                            
-                            
+
                             # 이전 frame record 없을 때
                             if len(time_vector[0]) == 0:
                                 time_vector[0].append([frame_sync, a, b])
