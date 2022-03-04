@@ -178,19 +178,6 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
                     if save_img or opt.save_crop or view_img:  # Add bbox to image
                         x1, y1 = (int(xyxy[0]) + int(xyxy[2])) / 2, int(xyxy[3])  # 중심점 좌표 x, y
-                        # rect_list = np.array([[80, 411], [283, 113], [435, 115], [620, 410]], np.int32)  # 차량 검출 범위 박스
-                        # # Create a black image
-                        # img_b = np.zeros((480, 720, 3), dtype=np.uint8)
-                        # img_b = cv2.polylines(img_b, [rect_list], True, (255, 255, 255), 4)
-                        # cv2.imshow('testsss', img_b)
-                        # cv2.waitKey(0)
-
-                        # img_b = cv2.cvtColor(img_b, cv2.COLOR_BGR2GRAY)
-                        # res, thr = cv2.threshold(img_b, 127, 255, cv2.THRESH_BINARY)
-                        # contours_b, his = cv2.findContours(thr, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-                        # cv2.drawContours(img_b, contours_b[0], -1, (0, 255, 0), 4)
-                        # cv2.imshow('testsss', img_b)
-                        # cv2.waitKey(0)
                         
                         dist = cv2.pointPolygonTest(contours_b[0], (x1, y1), False)
                         # if names[int(cls)] == 'car' or names[int(cls)] == 'person':  # box 가 차량이나 사람일 경우
@@ -203,7 +190,7 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
 
                             x, y, w, h = xyxy_[0], xyxy_[1], xyxy_[2], xyxy_[3]
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
-                            cv2.putText(im0, str(conf), (xyxy_[0], xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 1, cv2.LINE_AA)
+                            cv2.putText(im0, f'X:{x + (w / 2)} Y:{y + h}', (xyxy_[0]+(w/2), xyxy_[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
 
                             fx = x + (w / 2)
                             fy = y + h  # 차 밑 부분 찍는게 맞음 450
