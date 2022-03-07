@@ -10,7 +10,7 @@ import multiprocessing
 
 track_point=[]
 new_car_index=0
-Map_path = "./data/B3.png"
+Map_path = "data/videos/B3.png"
 Map = cv2.imread(Map_path)
 
 def getFrame(cctv_addr,cctv_name,return_dict):
@@ -20,7 +20,7 @@ def getFrame(cctv_addr,cctv_name,return_dict):
         start_time = time.time()
         ret,frame = cap.read()
         end_time = time.time()
-        print(f'Get {cctv_name} a frame - {round(end_time - start_time, 3)} s')
+        #print(f'Get {cctv_name} a frame - {round(end_time - start_time, 3)} s')
         if ret:
             return_dict['img'][cctv_name] = frame
         else:
@@ -29,10 +29,6 @@ def getFrame(cctv_addr,cctv_name,return_dict):
             return_dict['img'][cctv_name] = Error_image
             #retry
             cap = cv2.VideoCapture(cctv_addr)
-        k = cv2.waitKey(1) & 0xff
-        if k == 27:
-            cap.release()
-            break
 
 
 
@@ -45,7 +41,7 @@ def detect(return_dict):
     # model = torch.hub.load('ultralytics/yolov5', 'custom', path='yolov5s.pt',device=num%3)
     model = torch.hub.load('yolov5', 'custom', path='yolov5s.pt', source='local', device=0)
     # 검출하고자 하는 객체는 차량이기 때문에 coco data에서 검출할 객체를 차량으로만 특정(yolov5s.pt 사용시)
-    model.classes = [2]
+    model.classes = [0,2]
     model.conf = 0.7
     window_width=320
     window_height=270
@@ -63,7 +59,8 @@ def detect(return_dict):
 
             # 특정 구역에서만 Object 표시
             black_img = np.zeros((h, w, c), dtype=np.uint8)
-            black_img = cv2.fillPoly(black_img,cams[cctv_name]['road'], (255, 255, 255))
+            road_poly=np.array(cams[cctv_name]['road'])
+            black_img = cv2.fillPoly(black_img,[road_poly], (255, 255, 255))
             black_img = cv2.cvtColor(black_img, cv2.COLOR_BGR2GRAY)
             res, thr = cv2.threshold(black_img, 127, 255, cv2.THRESH_BINARY)
             contours, his = cv2.findContours(thr, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -115,8 +112,8 @@ def detect(return_dict):
             else:
                 return_dict[cctv_name] = (False, [])
             temp_img = cv2.resize(img, dsize=(window_width, window_height))
-
-        cv2.imshow(cctv_name, temp_img)
+            cv2.imshow(cctv_name, temp_img)
+            cv2.imwrite("runs/video/"+cctv_name+".jpg",temp_img)
         # send2server(return_dict)
         Stich_Car(return_dict)
         k = cv2.waitKey(1) & 0xff
@@ -125,18 +122,22 @@ def detect(return_dict):
 
 
 def Stich_Car(data):
-    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255)]
-
+    global new_car_index
+    global track_point
+    global Map
+    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255)]
     temp=[]
     #모든 차량에 대한 좌표 정보 temp에 복사
     for cctv_name in cams.keys():
         flag,points =data[cctv_name]
         if flag:
-           temp.append(points)
+            for i in points:
+                temp.append(i)
 
     #새로 추측한 결과들에 대해서도 다른 CCTV마다 약간의 위치 변화가 생길 수 있으므로 같은 차량으로 추정되는 차량 제거
     remove_temp_list=[]
     for i in range(1,len(temp)):
+        print(temp)
         if abs(temp[i-1][0]-temp[i][0])<154 and abs(temp[i-1][1]-temp[i][1])<64:
             remove_temp_list.append((temp[i][0],temp[i][1]))
     else:
@@ -152,7 +153,7 @@ def Stich_Car(data):
                 new_car_index+=1
             else:
                 for track_index,(near_index,tx,ty) in enumerate(track_point): #기존 트랙킹 하는 포인트와 새롭게 얻어낸 좌표 겹침 계산
-                    if abs(x-tx) <154 and abs(y-ty)<64:
+                    if abs(x-tx) <154 and abs(y-ty)<154:
                         track_point[track_index] = (near_index,x,y)
                     else:
                         track_point.append((new_car_index,x,y))
@@ -161,19 +162,21 @@ def Stich_Car(data):
         unfind_points=[]
         for (x,y) in temp:
             for track_index,(near_index,tx,ty) in enumerate(track_point):
-                if abs(x-tx) <154 and abs(y-ty)<64:
+                if abs(x-tx) <154 and abs(y-ty)<154:
                     track_point[track_index]=(near_index,x,y)
                     break
                 else:
                     unfind_points.append((new_car_index,x,y))
                     new_car_index+=1
             else:
-                track_point.remove((near_index,tx,tyS))
+                track_point.remove((near_index,tx,ty))
         track_point.extend(unfind_points)
+    #print("track point : ",track_point)
     for num, (near_index,tx,ty) in enumerate(track_point):
-        Map = cv2.circle(Map, (tx, ty), 30,COLORS(near_index%5), -1)  # 지도위에 표시
+        Map = cv2.circle(Map, (tx, ty), 30,COLORS[near_index%7], -1)  # 지도위에 표시
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
+    cv2.imwrite("runs/MAP/result.jpg",temp_Map)
 
 
 
@@ -236,13 +239,6 @@ def main():
 
     for proc in jobs:
         proc.join()
-
-
-
-
-
-
-        
 
 if __name__ == '__main__':
     main()
