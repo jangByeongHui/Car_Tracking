@@ -1,12 +1,12 @@
 import cv2
 import time
 from config_hd_2 import cams
-from transmit_server import put
+# from transmit_server import put
 import numpy as np
 import torch
 import datetime
 import multiprocessing
-import telegram
+# import telegram
 
 def getFrame(cctv_addr,cctv_name,return_dict):
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
@@ -213,6 +213,7 @@ def main():
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
     return_dict['img'] = manager.dict()
+    test_videos=["data/videos/Anyang2_SKV1_ch1_20220121090906.mp4","data/videos/Anyang2_SKV1_ch2_20220126165051_20220126165101.mp4","data/videos/Anyang2_SKV1_ch3_20220126165125_20220126165210.mp4","data/videos/Anyang2_SKV1_ch4_20220124132217_20220124132240.mp4","data/videos/Anyang2_SKV1_ch5_20220126165037_20220126165047.mp4"]
     #init
     for cctv_name in cams.keys():
         return_dict['img'][cctv_name] = np.zeros((1080, 1920, 3), np.uint8)
@@ -220,8 +221,8 @@ def main():
     jobs=[]
 
     # 멀티 프로세싱할 arguments 생성
-    for cctv_name in cams.keys():
-        work_lists.append((cams[cctv_name]['src'],cctv_name,return_dict))
+    for num,cctv_name in enumerate( cams.keys()):
+        work_lists.append((test_videos[num],cctv_name,return_dict))
 
     #프로세스 실행
     for i,work in enumerate(work_lists):
