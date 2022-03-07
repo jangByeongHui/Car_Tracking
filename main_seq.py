@@ -127,51 +127,50 @@ def Stich_Car(data):
     Map = cv2.imread(Map_path)
     COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255)]
     while True:
-        try:
-            temp=[]
-            #모든 차량에 대한 좌표 정보 temp에 복사
-            for cctv_name in cams.keys():
-                flag,points =data[cctv_name]
-                if flag:
-                   temp.append(points)
 
-            #새로 추측한 결과들에 대해서도 다른 CCTV마다 약간의 위치 변화가 생길 수 있으므로 같은 차량으로 추정되는 차량 제거
-            remove_temp_list=[]
-            for i in range(1,len(temp)):
-                if abs(temp[i-1][0]-temp[i][0])<154 and abs(temp[i-1][1]-temp[i][1])<64:
-                    remove_temp_list.append((temp[i][0],temp[i][1]))
-            else:
-                for (x,y) in remove_temp_list:
-                    temp.remove((x,y))
+        temp=[]
+        #모든 차량에 대한 좌표 정보 temp에 복사
+        for cctv_name in cams.keys():
+            flag,points =data[cctv_name]
+            if flag:
+               temp.append(points)
+
+        #새로 추측한 결과들에 대해서도 다른 CCTV마다 약간의 위치 변화가 생길 수 있으므로 같은 차량으로 추정되는 차량 제거
+        remove_temp_list=[]
+        for i in range(1,len(temp)):
+            if abs(temp[i-1][0]-temp[i][0])<154 and abs(temp[i-1][1]-temp[i][1])<64:
+                remove_temp_list.append((temp[i][0],temp[i][1]))
+        else:
+            for (x,y) in remove_temp_list:
+                temp.remove((x,y))
 
 
-            #Temp에 있는 좌표들과 이전 좌표들에 유사도 분석후 비슷한 좌표에 있는 것들은 하나로 포함(즉, 이전과 현재를 측정하여 비슷한 것 삭제)
-            if len(track_point)==0: #초기 트랙점 없을 경우
-                for (x,y) in temp:
-                    if len(track_point)==0: #초기 트랙점이 없을 경우 트랙 포인트 추가
-                        track_point.append((new_car_index,x,y))
-                        new_car_index+=1
-                    else:
-                        for track_index,(near_index,tx,ty) in enumerate(track_point): #기존 트랙킹 하는 포인트와 새롭게 얻어낸 좌표 겹침 계산
-                            if abs(x-tx) <154 and abs(y-ty)<64:
-                                track_point[track_index] = (near_index,x,y)
-                            else:
-                                track_point.append((new_car_index,x,y))
-                                new_car_index+=1
-            else:
-                unfind_points=[]
-                for (x,y) in temp:
-                    for track_index,(near_index,tx,ty) in enumerate(track_point):
+        #Temp에 있는 좌표들과 이전 좌표들에 유사도 분석후 비슷한 좌표에 있는 것들은 하나로 포함(즉, 이전과 현재를 측정하여 비슷한 것 삭제)
+        if len(track_point)==0: #초기 트랙점 없을 경우
+            for (x,y) in temp:
+                if len(track_point)==0: #초기 트랙점이 없을 경우 트랙 포인트 추가
+                    track_point.append((new_car_index,x,y))
+                    new_car_index+=1
+                else:
+                    for track_index,(near_index,tx,ty) in enumerate(track_point): #기존 트랙킹 하는 포인트와 새롭게 얻어낸 좌표 겹침 계산
                         if abs(x-tx) <154 and abs(y-ty)<64:
-                            track_point[track_index]=(near_index,x,y)
-                            break
+                            track_point[track_index] = (near_index,x,y)
                         else:
-                            unfind_points.append((new_car_index,x,y))
+                            track_point.append((new_car_index,x,y))
                             new_car_index+=1
+        else:
+            unfind_points=[]
+            for (x,y) in temp:
+                for track_index,(near_index,tx,ty) in enumerate(track_point):
+                    if abs(x-tx) <154 and abs(y-ty)<64:
+                        track_point[track_index]=(near_index,x,y)
+                        break
                     else:
-                        track_point.remove((near_index,tx,ty))
-                track_point.extend(unfind_points)
-
+                        unfind_points.append((new_car_index,x,y))
+                        new_car_index+=1
+                else:
+                    track_point.remove((near_index,tx,tyS))
+            track_point.extend(unfind_points)
         for num, (near_index,tx,ty) in enumerate(track_point):
             Map = cv2.circle(Map, (tx, ty), 30,COLORS(near_index%5), -1)  # 지도위에 표시
         temp_Map = cv2.resize(Map, dsize=(720, 480))
