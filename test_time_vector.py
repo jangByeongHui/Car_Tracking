@@ -251,21 +251,10 @@ def execute_tracking(cam_num, frame_sync, record):
     elif 71<= cam_num <= 100:
         cam = cam_num - 70
         channel = f'192.168.8.251_ch{cam}_'
-    
-    # start = '20210722093015' # case2
-    # start = '20210801120905' # case 3
-    # start = '20210728092930' # case 4
-    # start = '20210728082210' # case 5-1
-    # start = '20210728095145' # case 5-2
+
     start = '20210728134600' # caset 5-3
-    # finish = '20210722093100' # case2
-    # finish = '20210801120955' # case 3
-    # finish = '20210728093040' # case 4
-    # finish = '20210728082232' # case 5-1
-    # finish = '20210728095245' # case 5-2
     finish = '20210728134635' # case 5-3
     file = channel + start + '_' + finish
-    # 192.168.8.251_ch7_20210801120905_20210801120955
 
     # parser.add_argument('--source', type=str, default=f'rtsp://admin:admin1234@218.153.209.100:502/cam/realmonitor?channel={cam}&subtype=1', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--source', type=str, default=f'./data/videos/testcase5-3/{file}.mp4', help='source')  # file/folder, 0 for webcam
@@ -288,11 +277,6 @@ def execute_tracking(cam_num, frame_sync, record):
     parser.add_argument('--line-thickness', default=3, type=int, help='bounding box thickness (pixels)')
     parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
     parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
-    # parser.add_argument('--totalmap-conf', default='[[7736, 1688], [7396, 1686], [7402, 1439], [7720, 1442]]',
-    #                     help='totalmap')
-    # parser.add_argument('--map-conf', default='[[202, 182], [259, 117], [448, 118], [506, 183]]',
-    #                     help='totalmap')
-
     opt = parser.parse_args()
     print(opt)
     check_requirements(exclude=('tensorboard', 'pycocotools', 'thop'))
@@ -313,8 +297,6 @@ def find_parking_position(x, y):
     margin = 3
     position = ''
     for key in spot:
-        # top = spot[key]['top']
-        # left = spot[key]['left']
         top = spot[key][0]
         left = spot[key][1]
         if left-margin <= x < left+width+margin and top-margin <= y < top+height+margin:
@@ -391,11 +373,6 @@ if __name__ == '__main__':
     # Camera MP4
     test_camera = [77, 78, 79, 80, 24] # test case 5-1, 5-3 ->[77,78,79,80,24], test case 5-2 ->[77,78,79,80]
     # 입차 시간
-    # start = '20210722093015' # case2
-    # start = '20210801120905' # case 3
-    # start = '20210728092930' # case 4
-    # start = '20210728082210' # case 5-1
-    # start = '20210728095145' # case 5-2
     start = '20210728134600' # caset 5-3
 
     sync = 2 # 원본 영상 20FPS
@@ -417,15 +394,17 @@ if __name__ == '__main__':
 
 
     track_point = []
+    #프로세스별 추론 결과 가져오기
     temp = record[0][0] # 5 -> 3 dim
-    
+
+    # i번째 좌표 정보
     for i in range(len(temp)):
         track_point.append([])
-        track_point[i] = temp[i]
+        track_point[i] = temp[i] # 좌표 정보 가져오기
 
     # 카메라 넘어가는 부분 array 스티칭
     for n in range(1, len(test_camera)):
-        temp = record[n][0]
+        temp = record[n][0] # n번째 프로세스에서 좌표 정보
         for i in range(len(track_point)): 
             MIN = 10000000
             idx = -1
@@ -450,8 +429,6 @@ if __name__ == '__main__':
 
     im_src = cv2.imread('ch_b1.png')
     car_color = [[0,0,255],[255,0,0],[0,255,0],[255,255,0],[0,255,255]]
-
-    
 
     # 입치시간, 주차 위치, 주차시 카메라 번호 확인
     # 주차장 MAP에 차량 이동 경로 추적 
