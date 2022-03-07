@@ -197,24 +197,25 @@ def detect(opt, sync, cam_num, record):  # Homography 매칭에 사용되는 행
                             b = round(int(realC[1]), 0)  # 밑바닥 y 좌표
                             # 차량 지도 위치 저장
                             # 이전 frame record 없을 때
+                            # 검출된 차량에 frame_sync와 x,y 좌표 입력
                             if len(time_vector[0]) == 0:
                                 time_vector[0].append([frame_sync, a, b])
                             else: # record 존재할 때
-                                near_idx = 0
-                                IoU = False
-                                MIN = 10000000
-                                for car_idx in range(0, len(time_vector)):
-                                    if abs(a - time_vector[car_idx][-1][1]) < 153 and abs(b-time_vector[car_idx][-1][2]) < 64:
-                                        delta = abs(frame_sync - time_vector[car_idx][-1][0])
+                                near_idx = 0 # 0번 차량 부터 시작
+                                IoU = False # 비슷한 차량 및 시점차이가 가장 적은 경우 check
+                                MIN = 10000000 # 최소 frame_sync 저장 변수
+
+                                for car_idx in range(0, len(time_vector)): #각 차량별 상태 파악
+                                    if abs(a - time_vector[car_idx][-1][1]) < 153 and abs(b-time_vector[car_idx][-1][2]) < 64: # 객체들에 거리 변화를 통한 같은 객체 검출
+                                        delta = abs(frame_sync - time_vector[car_idx][-1][0]) # 현재 프레임과 이전 프레임들의 차이를 확인하여 차이가 적은 프레임으로 변화
                                         if MIN > delta:
                                             MIN = delta
                                             IoU = True
                                             near_idx = car_idx
                                 if IoU:
-                                    time_vector[near_idx].append([frame_sync, a, b])
+                                    time_vector[near_idx].append([frame_sync, a, b]) # time_vector 기존 차량에 대해서 frame_sync와 새로운 좌표 추가
                                 else:
-                                    time_vector.append([])
-                                    time_vector[-1].append([frame_sync, a, b])
+                                    time_vector.append([[frame_sync, a, b]]) # time vector 맨 뒤에 새로운 차량에 대한 정보 추가
 
             # data_list.append(dat)  # dat: 검출된 box xy 좌표 배열 목록
 
