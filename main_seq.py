@@ -10,7 +10,6 @@ import multiprocessing
 
 track_point=[[] for i in range(5)]
 FRANME_SYNC=-1
-prev_trackpoints =[]
 new_car_index=0
 Map_path = "data/videos/B3.png"
 Map = cv2.imread(Map_path)
@@ -131,11 +130,11 @@ def finddistance(x1,y1,x2,y2):
 def Stich_Car(data):
     global new_car_index
     global track_point
-    global prev_trackpoints
     global FRANME_SYNC
     global Map
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
-    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255),(255,69,0),(173,255,47),(100,149,237),(148,0,211),(255,105,180),(244,164,96),(240,255,255)] #표시할 색상들
+    # 표시할 색상들
+    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255),(255,69,0),(173,255,47),(100,149,237),(148,0,211),(255,105,180),(244,164,96),(240,255,255)]
     len_COLORS=len(COLORS)
     temp_points = [] # 여러 CCTV에 의해 중복되는 좌표를 제거 후 담을 좌표들
     all_temp_points =[] # 지도에 표시할 모든 좌표를 담을 좌표들
@@ -145,37 +144,38 @@ def Stich_Car(data):
     # 동일한 프레임 시간대에 지도에 표시되는 모든 좌표 저장
     for cctv_name in cams.keys(): # 모든 CCTV에서 좌표 가져오기
         flag,points = data[cctv_name] #현재 CCTV에서 좌표 정보가 있는지
+        #초기 모든 지도 죄표 저장
         for (pX,pY) in points:
             all_temp_points.append((pX,pY))
 
     # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
     for (aX,aY) in all_temp_points:
         for (tX,tY) in temp_points:
-            if finddistance(aX,aY,tX,tY)<threshold_dist:
+            if finddistance(aX,aY,tX,tY)<threshold_dist: #설정한 거리보다 가까우면 이미 포함된 좌표라고 판단
                 break
         else:
-            temp_points.append((aX,aY))
+            temp_points.append((aX,aY)) #기존에 없던 새로운 좌표
 
     # 이전 좌표들과 최대한 가까운 좌표 검출
     for (tX,tY) in temp_points:
-        Min = 1e9 # 
-        Min_car_index=0
-        similar_flag=0
+        Min = 1e9 # 최소값을 찾기 위한 초기화
+        Min_car_index=0 # 유사성이 높은 차량 번호
+        similar_flag=0 # 유사성이 높은 차량이 존재여부 FLAG
 
         #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
         for (car_index,prevX,prevY) in track_point[FRANME_SYNC]:
-            dist = finddistance(tX,tY,prevX,prevY)
+            dist = finddistance(tX,tY,prevX,prevY) # 이전 좌표와 현재 좌표거리들을 비교
             if dist<threshold_dist: # 좌표거리가 특정 거리 이하면은 판단
                 if Min>dist: # 특정 거리 이하 중에 제일 가까운 좌표
-                    similar_flag = True
-                    Min=dist
-                    Min_car_index=car_index
+                    similar_flag = True # 유사성이 있는 좌표가 있는 것으로 판단
+                    Min=dist # 가장 유사성이 높은 좌표 거리 저장
+                    Min_car_index=car_index #유사성이 높은 차량 index번호 저장
 
         if similar_flag:
-            temp_trackpoints.append((Min_car_index,tX,tY))
+            temp_trackpoints.append((Min_car_index,tX,tY)) #유사성이 있었으니 기존 index에 추가
         else:
-            temp_trackpoints.append(((new_car_index+1)%len_COLORS,tX,tY))
-            new_car_index+=1
+            temp_trackpoints.append(((new_car_index+1)%len_COLORS,tX,tY)) # 유사성 있는 것이 없었으니 새로운 값으로 할당
+            new_car_index+=1 # 새로운 차량 추가
 
     #트랙킹하는 좌표를 표시
     for num, (car_index,tx, ty) in enumerate(temp_trackpoints):
@@ -184,13 +184,11 @@ def Stich_Car(data):
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
     # cv2.imwrite("runs/MAP/result.jpg",temp_Map)
+
+    #최대 5개의 이전 프레임 기록을 저장
     FRANME_SYNC=(FRANME_SYNC+1)%5 #FRAME_SYNC는 0~4 값을 가지고 이전 기록을 계속해서 저장
     track_point[FRANME_SYNC]=temp_trackpoints #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
 
-
-
-
-# 추후 서버 전송
 # MQTT 전송시에는 데이터를 문자열로 보내야 한다.
 def send2server(data):
     bot = telegram.Bot(token="5137138184:AAEf4mPnuYIz2YT5HWGACYy5cKHsgo68OPY")
