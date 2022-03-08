@@ -134,7 +134,7 @@ def Stich_Car(data):
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
     COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255)] #표시할 색상들
     temp_points = [] # 지도에 표시할 모든 좌표를 담을 좌표
-    threshold_dist = 80
+    threshold_dist = 160
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
 
     # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
