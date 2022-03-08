@@ -80,10 +80,11 @@ def detect(return_dict):
                 x1, y1, x2, y2, conf, cls, name = int(i[0]), int(i[1]), int(i[2]), int(i[3]), i[4], i[5], i[6]
                 # 차량 하단 중심 좌표 표시
                 target_x = int((x1 + x2) / 2)  # 차량 중심 x 좌표
-                target_y = int((y1 + y2) / 2)  # 차량 중심 y 좌표
+                center_y = int((y1 + y2) / 2)  # 차량 중심 y 좌표
+                target_y = int(y2)  # 차량 하단 y 좌표
 
                 # 차량이 도로안에 있는 것만 검출
-                if cv2.pointPolygonTest(cnt,(target_x,target_y),False)>-1:  # 도로로 표시한 polygon안에 있는 경우에만 검출 차량이 도로에 있으면 1 없으면 -1 정확히 겹치면 0
+                if cv2.pointPolygonTest(cnt,(target_x,center_y),False)>-1:  # 도로로 표시한 polygon안에 있는 경우에만 검출 차량이 도로에 있으면 1 없으면 -1 정확히 겹치면 0
                     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)  # bounding box
                     cv2.putText(img, name, (x1 - 5, y1 - 5), font, 0.5, (255, 0, 0), 1)  # class 이름
                     cv2.putText(img, "{:.2f}".format(conf), (x1 + 5, y1 - 5), font, 0.5, (255, 0, 0), 1)  # 정확도
