@@ -8,7 +8,8 @@ import datetime
 import multiprocessing
 # import telegram
 
-track_point=[]
+track_point=[None for i in range(5)]
+FRANME_SYNC=-1
 prev_trackpoints =[]
 new_car_index=0
 Map_path = "data/videos/B3.png"
@@ -131,24 +132,29 @@ def Stich_Car(data):
     global new_car_index
     global track_point
     global prev_trackpoints
+    global FRANME_SYNC
     global Map
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
     COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255),(255,69,0),(173,255,47),(100,149,237),(148,0,211),(255,105,180),(244,164,96),(240,255,255)] #표시할 색상들
     len_COLORS=len(COLORS)
-    temp_points = [] # 지도에 표시할 모든 좌표를 담을 좌표
+    temp_points = [] # 여러 CCTV에 의해 중복되는 좌표를 제거 후 담을 좌표들
+    all_temp_points =[] # 지도에 표시할 모든 좌표를 담을 좌표들
     threshold_dist = 180
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
 
-    # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
+    # 동일한 프레임 시간대에 지도에 표시되는 모든 좌표 저장
     for cctv_name in cams.keys(): # 모든 CCTV에서 좌표 가져오기
         flag,points = data[cctv_name] #현재 CCTV에서 좌표 정보가 있는지
         for (pX,pY) in points:
-            # 기존 좌표들과 거리가 80 이상인 좌표들만 저장
-            for (tX,tY) in temp_points:
-                if finddistance(tX,tY,pX,pY) < threshold_dist:
-                    break
-            else:
-                temp_points.append((pX,pY)) #임시 변수에 좌표들 저장
+            all_temp_points.append((pX,pY))
+
+    # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
+    for (aX,aY) in all_temp_points:
+        for (tX,tY) in temp_points:
+            if finddistance(aX,aY,tX,tY)<threshold_dist:
+                break
+        else:
+            temp_points.appned((aX,aY))
 
     # 이전 좌표들과 최대한 가까운 좌표 검출
     for (tX,tY) in temp_points:
@@ -157,7 +163,7 @@ def Stich_Car(data):
         similar_flag=0
 
         #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
-        for (car_index,prevX,prevY) in prev_trackpoints:
+        for (car_index,prevX,prevY) in track_point[FRANME_SYNC]:
             dist = finddistance(tX,tY,prevX,prevY)
             if dist<threshold_dist: # 좌표거리가 특정 거리 이하면은 판단
                 if Min>dist: # 특정 거리 이하 중에 제일 가까운 좌표
@@ -171,8 +177,8 @@ def Stich_Car(data):
             temp_trackpoints.append(((new_car_index+1)%len_COLORS,tX,tY))
             new_car_index+=1
 
-    prev_trackpoints=temp_trackpoints
-    track_point.extend(prev_trackpoints) #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
+    FRANME_SYNC=(FRANME_SYNC+1)%5 #FRAME_SYNC는 0~4 값을 가지고 이전 기록을 계속해서 저장
+    track_point[FRANME_SYNC]=(temp_trackpoints) #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
 
     #트랙킹하는 좌표를 표시
     for num, (car_index,tx, ty) in enumerate(prev_trackpoints):
