@@ -142,7 +142,7 @@ def Stich_Car(data):
                 if finddistance(tX,tY,pX,pY) <80:
                     break
             else:
-                temp_points.append(point) #임시 변수에 좌표들 저장
+                temp_points.append((pX,pY)) #임시 변수에 좌표들 저장
 
 
     prev_trackpoint=temp_points
