@@ -8,7 +8,7 @@ import datetime
 import multiprocessing
 # import telegram
 
-track_point=[None for i in range(5)]
+track_point=[[] for i in range(5)]
 FRANME_SYNC=-1
 prev_trackpoints =[]
 new_car_index=0
@@ -154,11 +154,11 @@ def Stich_Car(data):
             if finddistance(aX,aY,tX,tY)<threshold_dist:
                 break
         else:
-            temp_points.appned((aX,aY))
+            temp_points.append((aX,aY))
 
     # 이전 좌표들과 최대한 가까운 좌표 검출
     for (tX,tY) in temp_points:
-        Min = 1e9
+        Min = 1e9 # 
         Min_car_index=0
         similar_flag=0
 
@@ -177,16 +177,15 @@ def Stich_Car(data):
             temp_trackpoints.append(((new_car_index+1)%len_COLORS,tX,tY))
             new_car_index+=1
 
-    FRANME_SYNC=(FRANME_SYNC+1)%5 #FRAME_SYNC는 0~4 값을 가지고 이전 기록을 계속해서 저장
-    track_point[FRANME_SYNC]=(temp_trackpoints) #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
-
     #트랙킹하는 좌표를 표시
-    for num, (car_index,tx, ty) in enumerate(prev_trackpoints):
+    for num, (car_index,tx, ty) in enumerate(temp_trackpoints):
         Map = cv2.circle(Map, (tx, ty), 30, COLORS[car_index], -1)  # 지도 위에 점으로 표시
         cv2.putText(Map,str(car_index), (tx, ty - 15), font, 2, (0, 0, 0), 3)  # car_index 표시
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
     # cv2.imwrite("runs/MAP/result.jpg",temp_Map)
+    FRANME_SYNC=(FRANME_SYNC+1)%5 #FRAME_SYNC는 0~4 값을 가지고 이전 기록을 계속해서 저장
+    track_point[FRANME_SYNC]=temp_trackpoints #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
 
 
 
