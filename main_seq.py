@@ -132,7 +132,8 @@ def Stich_Car(data):
     global prev_trackpoints
     global Map
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
-    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255)] #표시할 색상들
+    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255),(255,69,0),(173,255,47),(100,149,237),(148,0,211),(255,105,180),(244,164,96),(240,255,255)] #표시할 색상들
+    len_COLORS=len(COLORS)
     temp_points = [] # 지도에 표시할 모든 좌표를 담을 좌표
     threshold_dist = 160
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
@@ -168,7 +169,7 @@ def Stich_Car(data):
         if similar_flag:
             temp_trackpoints.append((Min_car_index,tX,tY))
         else:
-            temp_trackpoints.append(((new_car_index+1)%7,tX,tY))
+            temp_trackpoints.append(((new_car_index+1)%len_COLORS,tX,tY))
             new_car_index+=1
 
     prev_trackpoints=temp_trackpoints
