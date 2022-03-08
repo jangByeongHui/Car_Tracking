@@ -134,7 +134,7 @@ def Stich_Car(data):
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
     COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255)] #표시할 색상들
     temp_points = [] # 지도에 표시할 모든 좌표를 담을 좌표
-    threshold_dist = 160
+    threshold_dist = 180
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
 
     # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
@@ -151,18 +151,16 @@ def Stich_Car(data):
     # 이전 좌표들과 최대한 가까운 좌표 검출
     for (tX,tY) in temp_points:
         Min = 1e9
-        Min_index=0
         Min_car_index=0
         similar_flag=0
 
         #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
-        for index,(car_index,prevX,prevY) in enumerate(prev_trackpoints):
+        for (car_index,prevX,prevY) in prev_trackpoints:
             dist = finddistance(tX,tY,prevX,prevY)
             if dist<threshold_dist: # 좌표거리가 특정 거리 이하면은 판단
                 if Min>dist: # 특정 거리 이하 중에 제일 가까운 좌표
                     similar_flag = True
                     Min=dist
-                    Min_index=index
                     Min_car_index=car_index
 
         if similar_flag:
@@ -177,8 +175,8 @@ def Stich_Car(data):
     #트랙킹하는 좌표를 표시
     for num, (car_index,tx, ty) in enumerate(prev_trackpoints):
         Map = cv2.circle(Map, (tx, ty), 30, COLORS[car_index], -1)  # 지도 위에 점으로 표시
-        cv2.putText(Map,str(car_index), (tx, ty - 5), font, 0.5, (255, 0, 0), 1)  # car_index 표시
-    temp_Map = cv2.resize(Map, dsize=(1920, 1080))
+        cv2.putText(Map,str(car_index), (tx, ty - 15), font, 2, (0, 0, 0), 3)  # car_index 표시
+    temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
     # cv2.imwrite("runs/MAP/result.jpg",temp_Map)
 
