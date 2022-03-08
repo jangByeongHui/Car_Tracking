@@ -179,7 +179,7 @@ def Stich_Car(data):
         cv2.putText(Map,str(car_index), (tx, ty - 15), font, 2, (0, 0, 0), 3)  # car_index 표시
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
-    # cv2.imwrite("runs/MAP/result.jpg",temp_Map)
+    # cv2.imwrite("runs/MAP/result.jpg",temp_Map
 
 
 
