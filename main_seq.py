@@ -9,6 +9,7 @@ import multiprocessing
 # import telegram
 
 track_point=[]
+prev_trackpoint =[]
 new_car_index=0
 Map_path = "data/videos/B3.png"
 Map = cv2.imread(Map_path)
@@ -79,7 +80,7 @@ def detect(return_dict):
                 x1, y1, x2, y2, conf, cls, name = int(i[0]), int(i[1]), int(i[2]), int(i[3]), i[4], i[5], i[6]
                 # 차량 하단 중심 좌표 표시
                 target_x = int((x1 + x2) / 2)  # 차량 중심 x 좌표
-                target_y = int(y2)  # 차량 하단 좌표
+                target_y = int((y1 + y2) / 2)  # 차량 중심 y 좌표
 
                 # 차량이 도로안에 있는 것만 검출
                 if cv2.pointPolygonTest(cnt,(target_x,target_y),False)>-1:  # 도로로 표시한 polygon안에 있는 경우에만 검출 차량이 도로에 있으면 1 없으면 -1 정확히 겹치면 0
@@ -120,24 +121,36 @@ def detect(return_dict):
         if k == 27:
             break
 
+def finddistance(x1,y1,x2,y2):
+    a = np.array((x1, y1,0))
+    b = np.array((x2, y2, 0))
+    return np.sqrt(np.sum(np.square(a-b)))
 
 def Stich_Car(data):
     global new_car_index
     global track_point
+    global prev_trackpoint
     global Map
     COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255)] #표시할 색상들
     temp_points = [] # 지도에 표시할 모든 좌표를 담을 좌표
 
     for cctv_name in cams.keys(): # 모든 CCTV에서 좌표 가져오기
-        flag,points = data[cctv_name]
-        for point in points:
-            temp_points.append(point) #임시 변수에 좌표들 저장
+        flag,points = data[cctv_name] #현재 CCTV에서 좌표 정보가 있는지
+        for (pX,pY) in points:
+            # 기존 좌표들과 거리가 80 이상인 좌표들만 저장
+            for (tX,tY) in temp_points:
+                if finddistance(tX,tY,pX,pY) <80:
+                    break
+            else:
+                temp_points.append(point) #임시 변수에 좌표들 저장
 
-    track_point.extend(temp_points) #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
+
+    prev_trackpoint=temp_points
+    track_point.extend(prev_trackpoint) #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
 
     #트랙킹하는 좌표를 표시
-    for num, (tx, ty) in enumerate(track_point):
-        Map = cv2.circle(Map, (tx, ty), 30, COLORS[num%7], -1)  # 지도 위에 점으로 표시
+    for num, (tx, ty) in enumerate(prev_trackpoint):
+        Map = cv2.circle(Map, (tx, ty), 30, COLORS[0], -1)  # 지도 위에 점으로 표시
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
     cv2.imwrite("runs/MAP/result.jpg",temp_Map)
