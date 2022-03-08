@@ -125,7 +125,9 @@ def Stich_Car(data):
     global new_car_index
     global track_point
     global Map
+    COLORS = [(0,0,255),(255,0,0),(0,255,0),(255,255,0),(0,255,255),(100,100,100),(255,0,255)] #표시할 색상들
     temp_points = [] # 지도에 표시할 모든 좌표를 담을 좌표
+
     for cctv_name in cams.keys(): # 모든 CCTV에서 좌표 가져오기
         flag,points = data[cctv_name]
         for point in points:
