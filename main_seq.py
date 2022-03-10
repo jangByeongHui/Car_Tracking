@@ -178,13 +178,15 @@ def Stich_Car(data):
             new_car_index+=1 # 새로운 차량 추가
 
     #트랙킹하는 좌표를 표시
-    save_map=False
+    save_map=False #트랙킹 하는 객체가 검출된 경우에만 저장
     for num, (car_index,tx, ty) in enumerate(temp_trackpoints):
         Map = cv2.circle(Map, (tx, ty), 30, COLORS[car_index], -1)  # 지도 위에 점으로 표시
         cv2.putText(Map,str(car_index), (tx, ty - 15), font, 2, (0, 0, 0), 3)  # car_index 표시
         save_map=True
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
+
+    # 트랙킹한 결과 저장
     if save_map:
         now=time.localtime()
         now_TIME="%04d/%02d/%02d_%02d_%02d_%02d"%(now.tm_year,now.tm_mon,now.tm_mday,now.tm_hour,now.tm_min,now.tm_sec)
