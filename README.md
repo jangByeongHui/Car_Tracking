@@ -6,6 +6,38 @@
 ## 스티칭 알고리즘이란?
 스티칭 알고리즘이란 다른 CCTV에서 얻어진 좌표를 통해 각 좌표들의 거리를 측정하여 두 점의 좌표가 특정 거리 이하라면은
 같은 객체라고 판단하고 트랙킹을 하는 것이다.
+```
+# 동일한 프레임 시간대에 지도에 표시되는 모든 좌표 저장
+    for cctv_name in cams.keys(): # 모든 CCTV에서 좌표 가져오기
+        flag,points = data[cctv_name] #현재 CCTV에서 좌표 정보가 있는지
+        #초기 모든 지도 죄표 저장
+        for (pX,pY) in points:
+            all_temp_points.append((pX,pY))
+
+    # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
+    for (aX,aY) in all_temp_points:
+        for (tX,tY) in temp_points:
+            if finddistance(aX,aY,tX,tY)<threshold_dist: #설정한 거리보다 가까우면 이미 포함된 좌표라고 판단
+                break
+        else:
+            temp_points.append((aX,aY)) #기존에 없던 새로운 좌표
+
+    # 이전 좌표들과 최대한 가까운 좌표 검출
+    for (tX,tY) in temp_points:
+        Min = 1e9 # 최소값을 찾기 위한 초기화
+        Min_car_index=0 # 유사성이 높은 차량 번호
+        similar_flag=0 # 유사성이 높은 차량이 존재여부 FLAG
+
+        #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
+        for (car_index,prevX,prevY) in track_point[FRANME_SYNC]:
+            dist = finddistance(tX,tY,prevX,prevY) # 이전 좌표와 현재 좌표거리들을 비교
+            if dist<threshold_dist: # 좌표거리가 특정 거리 이하면은 판단
+                if Min>dist: # 특정 거리 이하 중에 제일 가까운 좌표
+                    similar_flag = True # 유사성이 있는 좌표가 있는 것으로 판단
+                    Min=dist # 가장 유사성이 높은 좌표 거리 저장
+                    Min_car_index=car_index #유사성이 높은 차량 index번호 저장
+
+```
 
 ## etc
 차량 트랙킹을 위해서는 도로 영역에만 있는 차량을 검출할 수 있어야한다. 그래서 config_hd_2.py 안에 homographyt 값과
@@ -65,4 +97,3 @@ if cv2.pointPolygonTest(cnt,(target_x,target_y),False)>-1:
 ![구현 이미지](asset/ativating_0310.png)
 
 ![트랙킹 된 지도](asset/20220310_144519.jpg)
-
