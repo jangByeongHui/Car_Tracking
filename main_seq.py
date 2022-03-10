@@ -11,8 +11,8 @@ import multiprocessing
 track_point=[[] for i in range(5)]
 FRANME_SYNC=-1
 new_car_index=0
-#Map_path = "data/videos/B3.png"
-#Map = cv2.imread(Map_path)
+Map_path = "data/videos/B3.png"
+Map = cv2.imread(Map_path)
 
 def getFrame(cctv_addr,cctv_name,return_dict):
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
@@ -138,7 +138,7 @@ def Stich_Car(data):
     len_COLORS=len(COLORS)
     temp_points = [] # 여러 CCTV에 의해 중복되는 좌표를 제거 후 담을 좌표들
     all_temp_points =[] # 지도에 표시할 모든 좌표를 담을 좌표들
-    threshold_dist = 180
+    threshold_dist = 200
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
 
     # 동일한 프레임 시간대에 지도에 표시되는 모든 좌표 저장
@@ -178,12 +178,17 @@ def Stich_Car(data):
             new_car_index+=1 # 새로운 차량 추가
 
     #트랙킹하는 좌표를 표시
+    save_map=False
     for num, (car_index,tx, ty) in enumerate(temp_trackpoints):
         Map = cv2.circle(Map, (tx, ty), 30, COLORS[car_index], -1)  # 지도 위에 점으로 표시
         cv2.putText(Map,str(car_index), (tx, ty - 15), font, 2, (0, 0, 0), 3)  # car_index 표시
+        save_map=True
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
-    # cv2.imwrite("runs/MAP/result.jpg",temp_Map)
+    if save_map:
+        now=time.localtime()
+        now_TIME="%04d/%02d/%02d_%02d_%02d_%02d"%(now.tm_year,now.tm_mon,now.tm_mday,now.tm_hour,now.tm_min,now.tm_sec)
+        cv2.imwrite(f'runs/detect/MAP/{now_TIME}.jpg',temp_Map)
 
     #최대 5개의 이전 프레임 기록을 저장
     FRANME_SYNC=(FRANME_SYNC+1)%5 #FRAME_SYNC는 0~4 값을 가지고 이전 기록을 계속해서 저장
