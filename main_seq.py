@@ -1,7 +1,7 @@
 import cv2
 import time
 from config_hd_2 import cams
-# from transmit_server import put
+from transmit_server import put
 import numpy as np
 import torch
 import datetime
@@ -11,8 +11,8 @@ import multiprocessing
 track_point=[[] for i in range(5)]
 FRANME_SYNC=-1
 new_car_index=0
-Map_path = "data/videos/B3.png"
-Map = cv2.imread(Map_path)
+#Map_path = "data/videos/B3.png"
+#Map = cv2.imread(Map_path)
 
 def getFrame(cctv_addr,cctv_name,return_dict):
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
@@ -70,7 +70,7 @@ def detect(return_dict):
             start_time=time.time()
             bodys = model(img, size=640) # yolov5 추론
             end_time=time.time()
-            print(f'yolov5 {cctv_name} img 추론 시간 - {round(end_time - start_time, 3)} s')
+            # print(f'yolov5 {cctv_name} img 추론 시간 - {round(end_time - start_time, 3)} s')
             flag = False
             points = []
 
@@ -116,8 +116,8 @@ def detect(return_dict):
             temp_img = cv2.resize(img, dsize=(window_width, window_height))
             cv2.imshow(cctv_name, temp_img)
             cv2.imwrite("runs/video/"+cctv_name+".jpg",temp_img)
-        # send2server(return_dict)
-        Stich_Car(return_dict)
+        send2server(return_dict)
+        #Stich_Car(return_dict)
         k = cv2.waitKey(1) & 0xff
         if k == 27:
             break
@@ -191,9 +191,9 @@ def Stich_Car(data):
 
 # MQTT 전송시에는 데이터를 문자열로 보내야 한다.
 def send2server(data):
-    bot = telegram.Bot(token="5137138184:AAEf4mPnuYIz2YT5HWGACYy5cKHsgo68OPY")
-    chat_id = 1930625013
-    Map_path = "./data/B3.png"
+    #bot = telegram.Bot(token="5137138184:AAEf4mPnuYIz2YT5HWGACYy5cKHsgo68OPY")
+    #chat_id = 1930625013
+    Map_path = "data/videos/B3.png"
     Map = cv2.imread(Map_path)
     try:
         temp_list = []
@@ -206,7 +206,7 @@ def send2server(data):
                     Map = cv2.circle(Map, (x, y), 30, (0, 255, 0), -1)  # 지도위에 표시
                     temp_list.append({'id': f'{cctv_name}_{num + 1}', 'top': y, 'left': x,
                                       'update': str(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))})
-                bot.sendMessage(chat_id=chat_id, text=f'cctv : {cctv_name} found {num+1} people!')
+                #bot.sendMessage(chat_id=chat_id, text=f'cctv : {cctv_name} found {num+1} people!')
         temp_Map = cv2.resize(Map, dsize=(720, 480))
         cv2.imshow("Map", temp_Map)
         if state:
