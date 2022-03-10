@@ -116,8 +116,8 @@ def detect(return_dict):
             temp_img = cv2.resize(img, dsize=(window_width, window_height))
             cv2.imshow(cctv_name, temp_img)
             cv2.imwrite("runs/video/"+cctv_name+".jpg",temp_img)
-        send2server(return_dict)
-        #Stich_Car(return_dict)
+        #send2server(return_dict)
+        Stich_Car(return_dict)
         k = cv2.waitKey(1) & 0xff
         if k == 27:
             break
@@ -223,7 +223,7 @@ def main():
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
     return_dict['img'] = manager.dict()
-    test_videos=["data/videos/Anyang2_SKV1_ch1_20220121090906.mp4","data/videos/Anyang2_SKV1_ch2_20220126165051_20220126165101.mp4","data/videos/Anyang2_SKV1_ch3_20220126165125_20220126165210.mp4","data/videos/Anyang2_SKV1_ch4_20220124132217_20220124132240.mp4","data/videos/Anyang2_SKV1_ch5_20220126165037_20220126165047.mp4"]
+    test_videos=["data/CCTV_02.mp4","data/CCTV_10.mp4","data/CCTV_11.mp4","data/CCTV_12.mp4","data/CCTV_17.mp4","data/CCTV_18.mp4","data/CCTV_19.mp4","data/CCTV_20.mp4","data/CCTV_21.mp4","data/CCTV_22.mp4","data/CCTV_23.mp4","data/CCTV_24.mp4"]
     #init
     for cctv_name in cams.keys():
         return_dict['img'][cctv_name] = np.zeros((1080, 1920, 3), np.uint8)
