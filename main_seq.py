@@ -42,8 +42,8 @@ def detect(return_dict):
     # model = torch.hub.load('ultralytics/yolov5', 'custom', path='yolov5s.pt',device=num%3)
     model = torch.hub.load('yolov5', 'custom', path='yolov5s.pt', source='local', device=0)
     # 검출하고자 하는 객체는 차량이기 때문에 coco data에서 검출할 객체를 차량으로만 특정(yolov5s.pt 사용시)
-    model.classes = [0,2]
-    model.conf = 0.7
+    model.classes = [2]
+    model.conf = 0.3
     window_width=320
     window_height=270
     # CCTV 화면 정렬
@@ -138,7 +138,7 @@ def Stich_Car(data):
     len_COLORS=len(COLORS)
     temp_points = [] # 여러 CCTV에 의해 중복되는 좌표를 제거 후 담을 좌표들
     all_temp_points =[] # 지도에 표시할 모든 좌표를 담을 좌표들
-    threshold_dist = 200
+    threshold_dist = 300
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
 
     # 동일한 프레임 시간대에 지도에 표시되는 모든 좌표 저장
@@ -149,7 +149,6 @@ def Stich_Car(data):
             all_temp_points.append((pX,pY))
 
     # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
-    temp_points.extend(track_point[FRANME_SYNC-1])
     for (aX,aY) in all_temp_points:
         for (tX,tY) in temp_points:
             if finddistance(aX,aY,tX,tY)<threshold_dist: #설정한 거리보다 가까우면 이미 포함된 좌표라고 판단
@@ -164,7 +163,10 @@ def Stich_Car(data):
         similar_flag=0 # 유사성이 높은 차량이 존재여부 FLAG
 
         #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
-        for (car_index,prevX,prevY) in track_point[FRANME_SYNC]:
+        track_points=[]
+        for num in range(5):
+            track_points.extend(track_point[num]) 
+        for (car_index,prevX,prevY) in track_points:
             dist = finddistance(tX,tY,prevX,prevY) # 이전 좌표와 현재 좌표거리들을 비교
             if dist<threshold_dist: # 좌표거리가 특정 거리 이하면은 판단
                 if Min>dist: # 특정 거리 이하 중에 제일 가까운 좌표
