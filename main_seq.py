@@ -8,7 +8,7 @@ import datetime
 import multiprocessing
 # import telegram
 
-track_point=[[] for i in range(5)]
+track_point=[[] for i in range(10)]
 FRANME_SYNC=-1
 new_car_index=0
 Map_path = "data/videos/B3.png"
