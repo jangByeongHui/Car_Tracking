@@ -43,7 +43,7 @@ def detect(return_dict):
     model = torch.hub.load('yolov5', 'custom', path='yolov5s.pt', source='local', device=0)
     # 검출하고자 하는 객체는 차량이기 때문에 coco data에서 검출할 객체를 차량으로만 특정(yolov5s.pt 사용시)
     model.classes = [2]
-    model.conf = 0.3
+    model.conf = 0.5
     window_width=320
     window_height=270
     # CCTV 화면 정렬
