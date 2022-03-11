@@ -164,7 +164,7 @@ def Stich_Car(data):
 
         #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
         track_points=[]
-        for num in range(5):
+        for num in range(9):
             track_points.extend(track_point[num]) 
         for (car_index,prevX,prevY) in track_points:
             dist = finddistance(tX,tY,prevX,prevY) # 이전 좌표와 현재 좌표거리들을 비교
@@ -196,7 +196,7 @@ def Stich_Car(data):
         cv2.imwrite(f'runs/detect/MAP/{now_TIME}.jpg',temp_Map)
 
     #최대 5개의 이전 프레임 기록을 저장
-    FRANME_SYNC=(FRANME_SYNC+1)%5 #FRAME_SYNC는 0~4 값을 가지고 이전 기록을 계속해서 저장
+    FRANME_SYNC=(FRANME_SYNC+1)%10 #FRAME_SYNC는 0~9 값을 가지고 이전 기록을 계속해서 저장
     track_point[FRANME_SYNC]=temp_trackpoints #기존 트랙킹하는 좌표안에 임시로 저장한 좌표들 저장
 
 # MQTT 전송시에는 데이터를 문자열로 보내야 한다.
