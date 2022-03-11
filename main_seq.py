@@ -149,6 +149,7 @@ def Stich_Car(data):
             all_temp_points.append((pX,pY))
 
     # 추론된 좌표들 중에서 이미 같은 것이라고 판단된 좌표들은 삭제
+    temp_points.extend(track_point[FRANME_SYNC-1])
     for (aX,aY) in all_temp_points:
         for (tX,tY) in temp_points:
             if finddistance(aX,aY,tX,tY)<threshold_dist: #설정한 거리보다 가까우면 이미 포함된 좌표라고 판단
