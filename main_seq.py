@@ -44,7 +44,7 @@ def detect(return_dict):
     # 검출하고자 하는 객체는 차량이기 때문에 coco data에서 검출할 객체를 차량으로만 특정(yolov5s.pt 사용시)
     model.classes = [2]
     model.conf = 0.5
-    window_width=320
+    window_width=330
     window_height=270
     # CCTV 화면 정렬
     for num,cctv_name in enumerate(cams.keys()):
@@ -138,7 +138,7 @@ def Stich_Car(data):
     len_COLORS=len(COLORS)
     temp_points = [] # 여러 CCTV에 의해 중복되는 좌표를 제거 후 담을 좌표들
     all_temp_points =[] # 지도에 표시할 모든 좌표를 담을 좌표들
-    threshold_dist = 300
+    threshold_dist = 400
     temp_trackpoints=[] # 현재 추론된 차량 트랙킹 정보를 담을 리스트
 
     # 동일한 프레임 시간대에 지도에 표시되는 모든 좌표 저장
