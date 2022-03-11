@@ -189,7 +189,7 @@ def Stich_Car(data):
     # 트랙킹한 결과 저장
     if save_map:
         now=time.localtime()
-        now_TIME="%04d/%02d/%02d_%02d_%02d_%02d"%(now.tm_year,now.tm_mon,now.tm_mday,now.tm_hour,now.tm_min,now.tm_sec)
+        now_TIME="%04d%02d%02d_%02d%02d%02d"%(now.tm_year,now.tm_mon,now.tm_mday,now.tm_hour,now.tm_min,now.tm_sec)
         cv2.imwrite(f'runs/detect/MAP/{now_TIME}.jpg',temp_Map)
 
     #최대 5개의 이전 프레임 기록을 저장
