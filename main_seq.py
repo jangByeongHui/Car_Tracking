@@ -162,7 +162,7 @@ def Stich_Car(data):
         Min_car_index=0 # 유사성이 높은 차량 번호
         similar_flag=0 # 유사성이 높은 차량이 존재여부 FLAG
 
-        #이전 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
+        #이전 10프레임 좌표들과 비교하였을 때 가장 비슷한 좌표 찾기 -> 이를 통해 같은 차량이라고 판단
         track_points=[]
         for num in range(9):
             track_points.extend(track_point[num]) 
