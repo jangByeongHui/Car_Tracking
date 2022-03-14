@@ -204,6 +204,9 @@ def main():
             new_points = detect(cctv_name,img) # 추론한 좌표 가져오기
             MAP_Points.extend(new_points) # 추론 좌표 저장
         Stich_Car(MAP_Points)
+        key = cv2.waitKey(1)
+        if key ==27:
+            break
 
 
 
