@@ -197,6 +197,7 @@ def main():
 
     while True:
         MAP_Points =[]
+        stop = False
         for cctv_name in cams.keys():
             #초기 빈화면
             img = np.zeros((720, 1920, 3), np.uint8)
@@ -205,12 +206,13 @@ def main():
             if ret:
                 img=frame
             else:
+                stop=True
                 cams[cctv_name]['cap'].release() #videocapture 객체 프리
             new_points = detect(cctv_name,img) # 추론한 좌표 가져오기
             MAP_Points.extend(new_points) # 추론 좌표 저장
         Stich_Car(MAP_Points)
         key = cv2.waitKey(1)
-        if key ==27:
+        if key ==27 or stop:
             break
 
 
