@@ -201,7 +201,8 @@ def main():
         concat_frame = cv2.vconcat([cv2.hconcat(frames[0:4]), cv2.hconcat(frames[4:8]), cv2.hconcat(frames[8:12])])  # 비디오 이미지 4*3으로 합치기
         MAP_img = cv2.hconcat([cv2.resize(MAP_img,dsize=(640,380)), np.zeros((380, 640, 3), np.uint8), np.zeros((380, 640, 3), np.uint8),np.zeros((380, 640, 3), np.uint8)])
         concat_frame = cv2.vconcat([concat_frame, MAP_img])  # 지도 이미지 합치기
-        cv2.imshow("ALL", concat_frame)
+        temp_concat_frame = cv2.resize(concat_frame,dsize=(1920,1080))
+        cv2.imshow("ALL", temp_concat_frame)
         out.write(concat_frame)
         key = cv2.waitKey(1)
         if key ==27 or stop:
