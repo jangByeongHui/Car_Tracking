@@ -131,19 +131,23 @@ def Stich_Car(points):
             new_car_index+=1 # 새로운 차량 추가
 
     #트랙킹하는 좌표를 표시
-    save_map=False #트랙킹 하는 객체가 검출된 경우에만 저장
+    # save_map=False #트랙킹 하는 객체가 검출된 경우에만 저장
     for num, (car_index,tx, ty) in enumerate(temp_trackpoints):
         Map = cv2.circle(Map, (tx, ty), 30, COLORS[car_index%len_COLORS], -1)  # 지도 위에 점으로 표시
         cv2.putText(Map,str(car_index), (tx, ty - 15), font, 2, (0, 0, 0), 3)  # car_index 표시
-        save_map=True
+        # save_map=True
     temp_Map = cv2.resize(Map, dsize=(720, 480))
     cv2.imshow("Map", temp_Map)
 
     # 트랙킹한 결과 저장
-    if save_map:
-        now=time.localtime()
-        now_TIME="%04d%02d%02d_%02d%02d%02d"%(now.tm_year,now.tm_mon,now.tm_mday,now.tm_hour,now.tm_min,now.tm_sec)
-        cv2.imwrite(f'runs/detect/MAP/{now_TIME}.jpg',temp_Map)
+    # if save_map:
+    #     now=time.localtime()
+    #     now_TIME="%04d%02d%02d_%02d%02d%02d"%(now.tm_year,now.tm_mon,now.tm_mday,now.tm_hour,now.tm_min,now.tm_sec)
+    #     cv2.imwrite(f'runs/detect/MAP/{now_TIME}.jpg',temp_Map)
+    #영상 제작용 무조건 저장
+    now = time.localtime()
+    now_TIME = "%04d%02d%02d_%02d%02d%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+    cv2.imwrite(f'runs/detect/MAP/{now_TIME}.jpg', temp_Map)
 
     #최대 10개의 이전 프레임 기록을 저장
     FRANME_SYNC=(FRANME_SYNC+1)%10 #FRAME_SYNC는 0~9 값을 가지고 이전 기록을 계속해서 저장
