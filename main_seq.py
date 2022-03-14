@@ -195,7 +195,7 @@ def main():
         for cctv_name in cams.keys():
             #초기 빈화면
             img = np.zeros((720, 1920, 3), np.uint8)
-            cv2.putText(Error_image, "Video Not Found!", (20, 70), font, 1, (0, 0, 255), 3)  # 비디오 접속 끊어짐 표시
+            cv2.putText(img, "Video Not Found!", (20, 70), font, 1, (0, 0, 255), 3)  # 비디오 접속 끊어짐 표시
             ret,frame = cams[cctv_name]['cap'].read() #각각 CCTV별로 이미지 가져오기
             if ret:
                 img=frame
