@@ -4,6 +4,7 @@ from config_hd_2 import cams
 from transmit_server import put
 import numpy as np
 import torch
+import datetime
 # import telegram
 
 track_point=[[] for i in range(10)]
