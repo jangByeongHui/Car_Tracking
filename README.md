@@ -52,7 +52,7 @@
 pip3 install -r requirements.txt
 
 # 트랙킹 시작
-python3 main_seq.py
+python3 main.py
 ~~~
 
 ~~~
