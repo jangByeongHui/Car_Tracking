@@ -77,7 +77,7 @@ def detect(cctv_name,img):
             target_point[0] = round(int(target_point[0]), 0)  # x - > left
             target_point[1] = round(int(target_point[1]), 0)  # y - > top
             points.append((target_point[0], target_point[1])) #Homography로 계산 좌표 값
-    resize_img = cv2.resize(img, dsize(window_height, window_width))
+    resize_img = cv2.resize(img, dsize=(window_height, window_width))
     cv2.imshow(cctv_name, resize_img)
     return points
 
