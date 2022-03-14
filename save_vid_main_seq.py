@@ -176,7 +176,7 @@ def send2server(data):
 def main():
     # 초기 설정 값
     test_videos=["data/CCTV_02.mp4","data/CCTV_10.mp4","data/CCTV_11.mp4","data/CCTV_12.mp4","data/CCTV_17.mp4","data/CCTV_18.mp4","data/CCTV_19.mp4","data/CCTV_20.mp4","data/CCTV_21.mp4","data/CCTV_22.mp4","data/CCTV_23.mp4","data/CCTV_24.mp4"]
-    out = cv2.VideoWriter('all_view.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (2560, 1440))
+    out = cv2.VideoWriter('all_view.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (2560, 1440))
     # CCTV 화면 정렬
     for num, cctv_name in enumerate(cams.keys()):
         cv2.namedWindow(cctv_name)
