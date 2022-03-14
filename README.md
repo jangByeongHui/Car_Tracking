@@ -101,3 +101,7 @@ if cv2.pointPolygonTest(cnt,(target_x,target_y),False)>-1:
 
 ### 2022/03/11일자 결과
 ![트랙킹 된 지도](asset/20220311_152035.jpg)
+
+### 2022/03/14일자 결과
+![트랙킹 영상](asset/car_tracking.gif)
+
