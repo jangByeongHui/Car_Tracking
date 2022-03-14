@@ -170,11 +170,10 @@ def send2server(data):
 def main():
     # 초기 설정 값
     test_videos=["data/CCTV_02.mp4","data/CCTV_10.mp4","data/CCTV_11.mp4","data/CCTV_12.mp4","data/CCTV_17.mp4","data/CCTV_18.mp4","data/CCTV_19.mp4","data/CCTV_20.mp4","data/CCTV_21.mp4","data/CCTV_22.mp4","data/CCTV_23.mp4","data/CCTV_24.mp4"]
-    out = cv2.VideoWriter('all_view.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (2560, 1440))
     # CCTV 화면 정렬
     cv2.namedWindow("ALL")
     cv2.moveWindow("ALL", 0,0)
-
+    out = cv2.VideoWriter('all_view.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (2560,1440))
     #videocapture 객체 저장
     for index,cctv_name in enumerate(cams.keys()):
         cams[cctv_name]['cap']=cv2.VideoCapture(test_videos[index])
@@ -194,12 +193,12 @@ def main():
                 stop=True
                 cams[cctv_name]['cap'].release() #videocapture 객체 프리
             new_points,detect_img = detect(cctv_name,img) # 추론한 좌표 가져오기
-            frames.append(cv2.resize(detect_img,dsize=(640,380)))
+            frames.append(cv2.resize(detect_img,dsize=(640,360)))
             MAP_Points.extend(new_points) # 추론 좌표 저장
         #모든 이미지 비디오 저장
         MAP_img = Stich_Car(MAP_Points)
         concat_frame = cv2.vconcat([cv2.hconcat(frames[0:4]), cv2.hconcat(frames[4:8]), cv2.hconcat(frames[8:12])])  # 비디오 이미지 4*3으로 합치기
-        MAP_img = cv2.hconcat([cv2.resize(MAP_img,dsize=(640,380)), np.zeros((380, 640, 3), np.uint8), np.zeros((380, 640, 3), np.uint8),np.zeros((380, 640, 3), np.uint8)])
+        MAP_img = cv2.hconcat([cv2.resize(MAP_img,dsize=(640,360)), np.zeros((360, 640, 3), np.uint8), np.zeros((360, 640, 3), np.uint8),np.zeros((360, 640, 3), np.uint8)])
         concat_frame = cv2.vconcat([concat_frame, MAP_img])  # 지도 이미지 합치기
         temp_concat_frame = cv2.resize(concat_frame,dsize=(1920,1080))
         cv2.imshow("ALL", temp_concat_frame)
