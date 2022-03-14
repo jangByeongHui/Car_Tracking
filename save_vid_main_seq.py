@@ -78,8 +78,6 @@ def detect(cctv_name,img):
             target_point[0] = round(int(target_point[0]), 0)  # x - > left
             target_point[1] = round(int(target_point[1]), 0)  # y - > top
             points.append((target_point[0], target_point[1])) #Homography로 계산 좌표 값
-    resize_img = cv2.resize(img, dsize=(window_height, window_width))
-    cv2.imshow(cctv_name, resize_img)
     return points,img
 
 def finddistance(x1,y1,x2,y2):
@@ -178,9 +176,8 @@ def main():
     test_videos=["data/CCTV_02.mp4","data/CCTV_10.mp4","data/CCTV_11.mp4","data/CCTV_12.mp4","data/CCTV_17.mp4","data/CCTV_18.mp4","data/CCTV_19.mp4","data/CCTV_20.mp4","data/CCTV_21.mp4","data/CCTV_22.mp4","data/CCTV_23.mp4","data/CCTV_24.mp4"]
     out = cv2.VideoWriter('all_view.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (2560, 1440))
     # CCTV 화면 정렬
-    for num, cctv_name in enumerate(cams.keys()):
-        cv2.namedWindow(cctv_name)
-        cv2.moveWindow(cctv_name, window_width * (num % 6), window_height * (num // 6))
+    cv2.namedWindow("ALL")
+    cv2.moveWindow("ALL", 0,0)
 
     #videocapture 객체 저장
     for index,cctv_name in enumerate(cams.keys()):
