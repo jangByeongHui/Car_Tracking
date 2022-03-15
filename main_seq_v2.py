@@ -12,7 +12,7 @@ def getFrame(cctv_addr,cctv_name,img_list):
     while True:
         ret, frame = cap.read()
         if ret:
-            heapq.heappush(img_list,(T,cctv_name,frame))
+            img_list.append((T,cctv_name,frame))
             T += 1
         else:
             break
@@ -27,7 +27,7 @@ def detect(img_list,return_points):
     model.classes = [2]
     model.conf = 0.5
     while img_list:
-        T,cctv_name,img = heapq.heappop(img_list)
+        T,cctv_name,img = img_list.pop()
         h, w, c = img.shape
 
         # 특정 구역에서만 Object 표시
