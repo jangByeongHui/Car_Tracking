@@ -28,7 +28,6 @@ def detect(img_list,return_points,i):
     while img_list:
         T,cctv_name,img = img_list.pop()
         h, w, c = img.shape
-
         # 특정 구역에서만 Object 표시
         black_img = np.zeros((h, w, c), dtype=np.uint8)
         road_poly = np.array(cams[cctv_name]['road'])
