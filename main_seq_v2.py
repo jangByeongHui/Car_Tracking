@@ -3,7 +3,7 @@ import time
 from config_hd_2 import cams
 import numpy as np
 import torch
-import multiprocessing`
+import multiprocessing
 
 def getFrame(cctv_addr,cctv_name,img_list):
     cap = cv2.VideoCapture(cctv_addr)
