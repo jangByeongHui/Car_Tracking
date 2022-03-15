@@ -197,9 +197,10 @@ def main():
             MAP_Points.extend(new_points) # 추론 좌표 저장
         #모든 이미지 비디오 저장
         MAP_img = Stich_Car(MAP_Points)
-        concat_frame = cv2.vconcat([cv2.hconcat(frames[0:4]), cv2.hconcat(frames[4:8]), cv2.hconcat(frames[8:12])])  # 비디오 이미지 4*3으로 합치기
-        MAP_img = cv2.hconcat([cv2.resize(MAP_img,dsize=(640,360)), np.zeros((360, 640, 3), np.uint8), np.zeros((360, 640, 3), np.uint8),np.zeros((360, 640, 3), np.uint8)])
-        concat_frame = cv2.vconcat([concat_frame, MAP_img])  # 지도 이미지 합치기
+        first_row = cv2.hconcat(frames[0:4])
+        second_row = cv2.hconcat([cv2.vconcat(frames[4:6]),cv2.resize(MAP_img,dsize=(1280,760)),cv2.vconcat([frames[6:8]])])
+        third_row = cv2.hconcat(frames[8:12])
+        concat_frame = cv2.vconcat([first_row,second_row,third_row])
         temp_concat_frame = cv2.resize(concat_frame,dsize=(1920,1080))
         cv2.imshow("ALL", temp_concat_frame)
         out.write(concat_frame)
