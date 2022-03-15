@@ -198,7 +198,7 @@ def main():
         #모든 이미지 비디오 저장
         MAP_img = Stich_Car(MAP_Points)
         first_row = cv2.hconcat(frames[0:4])
-        second_row = cv2.hconcat([cv2.vconcat(frames[4:6]),cv2.resize(MAP_img,dsize=(1280,760)),cv2.vconcat([frames[6:8]])])
+        second_row = cv2.hconcat([cv2.vconcat(frames[4:6]),cv2.resize(MAP_img,dsize=(1280,720)),cv2.vconcat(frames[6:8])])
         third_row = cv2.hconcat(frames[8:12])
         concat_frame = cv2.vconcat([first_row,second_row,third_row])
         temp_concat_frame = cv2.resize(concat_frame,dsize=(1920,1080))
