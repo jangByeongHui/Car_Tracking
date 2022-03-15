@@ -101,6 +101,9 @@ def main():
     for proc in jobs:
         proc.join()
     return_points.sort()
+    with open('return_points.txt', 'w', encoding='UTF-8') as f:
+        for point in return_points:
+            f.write(point + '\n')
     print(return_points)
 
 if __name__ == '__main__':
