@@ -16,12 +16,12 @@ def getFrame(cctv_addr,cctv_name,img_list):
         else:
             break
 
-def detect(img_list,return_points):
+def detect(img_list,return_points,i):
     font = cv2.FONT_HERSHEY_SIMPLEX  # 글씨 폰트
     # yolov5
     # 로컬 레포에서 모델 로드(yolov5s.pt 가중치 사용, 추후 학습후 path에 변경할 가중치 경로 입력)
     # 깃허브에서 yolov5 레포에서 모델 로드
-    model = torch.hub.load('yolov5', 'custom', path='yolov5s.pt', source='local', device=0)
+    model = torch.hub.load('yolov5', 'custom', path='yolov5s.pt', source='local', device=i%3)
     # 검출하고자 하는 객체는 차량이기 때문에 coco data에서 검출할 객체를 차량으로만 특정(yolov5s.pt 사용시)
     model.classes = [2]
     model.conf = 0.5
@@ -92,15 +92,16 @@ def main():
         p = multiprocessing.Process(target=getFrame, args=work)
         jobs.append(p)
         p.start()
-    else:
-        p = multiprocessing.Process(target=detect,args=(img_list,return_points))
+
+    for i in range(3):
+        p = multiprocessing.Process(target=detect,args=(img_list,return_points,i))
         jobs.append(p)
         p.start()
 
     #실행 완료된 프로세스 JOIN
     for proc in jobs:
         proc.join()
-    return_points.sort()
+
     with open('return_points.txt', 'w', encoding='UTF-8') as f:
         for point in return_points:
             f.write(point + '\n')
