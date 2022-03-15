@@ -4,6 +4,7 @@ from config_hd_2 import cams
 import numpy as np
 import torch
 import multiprocessing
+import heapq #최소힙을 사용하여 넣을 때 가장 작은 값이 맨 뒤에 있도록 함
 
 def getFrame(cctv_addr,cctv_name,img_list):
     cap = cv2.VideoCapture(cctv_addr)
@@ -11,7 +12,7 @@ def getFrame(cctv_addr,cctv_name,img_list):
     while True:
         ret, frame = cap.read()
         if ret:
-            img_list.append((T,cctv_name,frame))
+            heapq.heappush(img_list,(T,cctv_name,frame))
             T += 1
         else:
             break
@@ -26,7 +27,7 @@ def detect(img_list,return_points):
     model.classes = [2]
     model.conf = 0.5
     while img_list:
-        T,cctv_name,img = img_list.pop()
+        T,cctv_name,img = heapq.heappop(img_list)
         h, w, c = img.shape
 
         # 특정 구역에서만 Object 표시
@@ -70,7 +71,7 @@ def detect(img_list,return_points):
                 target_point = list(target_point)
                 target_point[0] = round(int(target_point[0]), 0)  # x - > left
                 target_point[1] = round(int(target_point[1]), 0)  # y - > top
-                return_points.append((T,(target_point[0],target_point[1])))
+                heapq.heappush(return_points,(T,(target_point[0],target_point[1])))
 
 def main():
     # 작업 결과 저장 dict
@@ -101,7 +102,6 @@ def main():
     for proc in jobs:
         proc.join()
 
-    return_points.sort()
     print(return_points)
 
 if __name__ == '__main__':
