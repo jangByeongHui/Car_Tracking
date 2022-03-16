@@ -4,6 +4,7 @@ from config_hd_2 import cams
 import numpy as np
 import torch
 import multiprocessing
+import pickle
 
 def getFrame(cctv_addr,cctv_name,img_list):
     cap = cv2.VideoCapture(cctv_addr)
@@ -101,9 +102,8 @@ def main():
     for proc in jobs:
         proc.join()
 
-    with open('return_points.txt', 'w', encoding='UTF-8') as f:
-        for point in return_points:
-            f.write(point + '\n')
+    with open('return_points.pkl', 'wb') as f:
+        pickle.dump(return_points,f)
     print(return_points)
 
 if __name__ == '__main__':
