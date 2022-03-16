@@ -15,3 +15,8 @@ while True:
         out.release()
         break
     cv2.imshow("converting",frame)
+    key = cv2.waitKey(1)
+    if key == 27:
+        cap.release()
+        out.release()
+        break
