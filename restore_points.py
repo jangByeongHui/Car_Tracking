@@ -24,8 +24,8 @@ MAP_PATH = "data/B3.png"
 Map = cv2.imread(MAP_PATH)
 
 # 동영상 저장시 초기 설정
-# h,w,c = Map.shape
-# out = cv2.VideoWriter('Tracking.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (w,h))
+h,w,c = Map.shape
+#out = cv2.VideoWriter('Tracking.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (1920,1080))
 
 list.sort(reverse=True) #예전 프레임일수록 뒤에
 
@@ -43,32 +43,33 @@ while list:
         new_tackpoints = []
         for nx,ny in now_points:
             for trackobject in track_points:
-                id,tx,ty = trackobject
+                id,tx,ty,distance= trackobject
                 if finddistance(nx,ny,tx,ty)<300:
-                    new_tackpoints.append((id,nx,ny))
+                    new_tackpoints.append((id,nx,ny,finddistance(nx,ny,tx,ty)))
                     break
             else:
-                new_tackpoints.append((idx,nx,ny))
+                new_tackpoints.append((idx,nx,ny,0))
                 idx += 1
         # 지도위에 표시
-        monitor_img = np.zeros((2000,1000, 3), np.uint8)
+        monitor_img = np.zeros((2000,1500, 3), np.uint8)
         cv2.putText(monitor_img, f'NOW FRAMES : {now_frames}', (0, 50), font, 2, (0, 250, 0), 5)
         for num,value in enumerate(new_tackpoints):
-            id,x,y = value
+            id,x,y ,distance = value
             Map = cv2.circle(Map, (x, y), 30,COLORS[id%len(COLORS)], -1)  # 지도위에 표시
             cv2.putText(Map, f'{id}',(x-15,y+15), font,1.5, (0, 0,0), 4)
-            cv2.putText(monitor_img, f'ID : {id} X : {x} Y : {y}', (0,20+100*(num+1)), font, 2, (0,250, 0), 5)
+            cv2.putText(monitor_img, f'ID : {id} X : {x} Y : {y} distance : {distance:.3f}', (0,20+100*(num+1)), font, 2, (0,250, 0), 5)
         now_frames=list[-1][0]
         track_points=new_tackpoints
         now_points =[]
-        print(track_points)
-        cv2.imshow("MAP",Map)
-        cv2.imshow("monitor", monitor_img)
-        key = cv2.waitKey(1)
-        if key == 27:
-            break
-        if key == ord('p'):
-            cv2.waitKey(-1)
+        # print(track_points)
+        save_vid_img=cv2.hconcat([cv2.resize(monitor_img,dsize=(480,1080)),cv2.resize(Map,dsize=(1440,1080))])
+        cv2.imshow("monitor", save_vid_img)
+        #out.write(save_vid_img)
+        # key = cv2.waitKey(1)
+        # if key == 27:
+        #     break
+        # if key == ord('p'):
+        #     cv2.waitKey(-1)
 
 
 
